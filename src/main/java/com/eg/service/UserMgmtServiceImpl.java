@@ -139,10 +139,10 @@ public class UserMgmtServiceImpl implements UserMgmtService {
 	@Override
 	public String forgetPwd(String email) {
 		UserMaster entity = userMasterRepo.findByEmail(email);
-		
-		if(entity==null) {
+		if (entity == null) {
 			return "Invalid Email";
 		}
+		//TODO:send pwd to user in email
 		return null;
 	}
 
