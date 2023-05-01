@@ -1,5 +1,7 @@
 package com.eg.service;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,11 +16,14 @@ import com.eg.bindings.Login;
 import com.eg.bindings.User;
 import com.eg.entity.UserMaster;
 import com.eg.repo.UserMasterRepo;
+import com.eg.utils.EmailUtils;
 
 public class UserMgmtServiceImpl implements UserMgmtService {
 
 	@Autowired
 	private UserMasterRepo userMasterRepo;
+	@Autowired
+	private EmailUtils emailUtils;
 
 	@Override
 	public boolean saveUser(User user) {
@@ -27,9 +32,14 @@ public class UserMgmtServiceImpl implements UserMgmtService {
 		// we create a method of private type to generate password in this class
 		// generateRandomPwd()
 		entity.setPassword(generateRandomPwd());
-		entity.setAccStatus("IN-Active");
+		entity.setAccStatus("In-Active");
 
 		UserMaster save = userMasterRepo.save(entity);
+		
+		String subject="Your Registration success";
+		String filename="REG-MAIL-BODY.txt";
+		String body=readEmailBody(entity.getFullName(),entity.getPassword(),filename);
+		emailUtils.sendEmail(user.getEmail(), subject, body);
 
 		// TODO:send registration email
 		return save.getUserId() != null;
@@ -137,12 +147,18 @@ public class UserMgmtServiceImpl implements UserMgmtService {
 	}
 
 	@Override
-	public String forgetPwd(String email) {
+	public String forgotPwd(String email) {
 		UserMaster entity = userMasterRepo.findByEmail(email);
 		if (entity == null) {
 			return "Invalid Email";
 		}
-		//TODO:send pwd to user in email
+		String subject="Forgot Password";
+		String fileName="RECOVER-MAIL-BODY.txt";
+		String body=readEmailBody(entity.getEmail(),entity.getPassword(), fileName);
+		boolean sendEmail = emailUtils.sendEmail(email, subject, body);
+		if(sendEmail) {
+			return "Password send to your Registered Email";
+		}
 		return null;
 	}
 
@@ -163,5 +179,33 @@ public class UserMgmtServiceImpl implements UserMgmtService {
 		return sb.toString();
 
 	}
+	private String readEmailBody(String fullname,String pwd,String filename) {
+		
+		String url="";
+		String mailBody=null;
+		try {
+			FileReader fr=new FileReader(filename);//read character one by one
+			BufferedReader br=new BufferedReader(fr);//read line by line
+			
+			StringBuffer buffer=new StringBuffer();
+			String line = br.readLine();//ready line 
+			while(line!=null) {
+				buffer.append(line);
+				line=br.readLine();
+			}
+			br.close();
+			mailBody =buffer.toString();
+			mailBody=mailBody.replace("{FULLNAME}", fullname);
+			mailBody=mailBody.replace("{TEMP-PWD}", pwd);
+			mailBody=mailBody.replace("{URL}",url);
+			mailBody=mailBody.replace("{PWD}",pwd);
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return mailBody;
+	}
+
+	
 
 }

@@ -25,7 +25,7 @@ public interface UserMgmtService {
 	public String login(Login login);
 	//we are returning the String ,because to know credential is wron or account status is inactive 
 	//to convey proper msg to user 
-	public String forgetPwd(String email);
+	public String forgotPwd(String email);
 	
 	
 

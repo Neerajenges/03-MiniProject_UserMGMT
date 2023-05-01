@@ -1,0 +1,8 @@
+#SMTP (Simple mail Transfer Protocol for sending email-we have to configure SMTP properties)
+
+spring:
+  mail:
+    host: null
+    port: null
+    username: null
+    password: null
