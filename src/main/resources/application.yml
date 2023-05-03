@@ -1,8 +1,40 @@
 #SMTP (Simple mail Transfer Protocol for sending email-we have to configure SMTP properties)
-
+server:
+  port: 9093
+  
 spring:
-  mail:
-    host: null
-    port: null
-    username: null
-    password: null
+  mail: 
+    host: smpt.gmail.com
+    port: 587
+    username: engineersgesture@gmail.com
+    password: abc@123
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+        
+    
+#database configuration 
+   
+  datasource:
+    url: jdbc:mysql://localhost:3306/UserMgmt
+    username: root
+    password: neerajeg
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5Dialect
+   
+
+
+
+
+
+  

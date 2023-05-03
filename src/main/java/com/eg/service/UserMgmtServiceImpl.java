@@ -10,6 +10,7 @@ import java.util.Random;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.stereotype.Service;
 
 import com.eg.bindings.ActivateAccount;
 import com.eg.bindings.Login;
@@ -18,6 +19,7 @@ import com.eg.entity.UserMaster;
 import com.eg.repo.UserMasterRepo;
 import com.eg.utils.EmailUtils;
 
+@Service
 public class UserMgmtServiceImpl implements UserMgmtService {
 
 	@Autowired
