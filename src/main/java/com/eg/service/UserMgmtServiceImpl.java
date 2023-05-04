@@ -39,7 +39,7 @@ public class UserMgmtServiceImpl implements UserMgmtService {
 		UserMaster save = userMasterRepo.save(entity);
 		
 		String subject="Your Registration success";
-		String filename="REG-MAIL-BODY.txt";
+		String filename="REG-EMAIL-BODY.txt";
 		String body=readEmailBody(entity.getFullName(),entity.getPassword(),filename);
 		emailUtils.sendEmail(user.getEmail(), subject, body);
 
@@ -155,7 +155,7 @@ public class UserMgmtServiceImpl implements UserMgmtService {
 			return "Invalid Email";
 		}
 		String subject="Forgot Password";
-		String fileName="RECOVER-MAIL-BODY.txt";
+		String fileName="RECOVER-PWD-BODY.txt";
 		String body=readEmailBody(entity.getEmail(),entity.getPassword(), fileName);
 		boolean sendEmail = emailUtils.sendEmail(email, subject, body);
 		if(sendEmail) {

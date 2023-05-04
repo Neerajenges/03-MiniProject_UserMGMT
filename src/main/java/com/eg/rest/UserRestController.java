@@ -76,7 +76,7 @@ public class UserRestController {
 		}
 	}
 	@PostMapping("/login")
-	public ResponseEntity<String> login(@PathVariable Login login){
+	public ResponseEntity<String> login(@RequestBody Login login){
 		String status = service.login(login);
 		return new ResponseEntity<>(status,HttpStatus.OK) ;
 	}
