@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -21,11 +25,15 @@ import com.eg.utils.EmailUtils;
 
 @Service
 public class UserMgmtServiceImpl implements UserMgmtService {
-
+	
+	private Logger logger=LoggerFactory.getLogger(UserMgmtServiceImpl.class);
+	
 	@Autowired
 	private UserMasterRepo userMasterRepo;
 	@Autowired
 	private EmailUtils emailUtils;
+	
+	private Random random=new Random();
 
 	@Override
 	public boolean saveUser(User user) {
@@ -37,10 +45,10 @@ public class UserMgmtServiceImpl implements UserMgmtService {
 		entity.setAccStatus("In-Active");
 
 		UserMaster save = userMasterRepo.save(entity);
-		
-		String subject="Your Registration success";
-		String filename="REG-EMAIL-BODY.txt";
-		String body=readEmailBody(entity.getFullName(),entity.getPassword(),filename);
+
+		String subject = "Your Registration success";
+		String filename = "REG-EMAIL-BODY.txt";
+		String body = readEmailBody(entity.getFullName(), entity.getPassword(), filename);
 		emailUtils.sendEmail(user.getEmail(), subject, body);
 
 		// TODO:send registration email
@@ -105,7 +113,8 @@ public class UserMgmtServiceImpl implements UserMgmtService {
 			userMasterRepo.deleteById(userId);
 			return true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();//it will display on console we lag to show on logger file 
+			logger.error("Exception Occured",e);
 		}
 		return false;
 	}
@@ -154,11 +163,11 @@ public class UserMgmtServiceImpl implements UserMgmtService {
 		if (entity == null) {
 			return "Invalid Email";
 		}
-		String subject="Forgot Password";
-		String fileName="RECOVER-PWD-BODY.txt";
-		String body=readEmailBody(entity.getEmail(),entity.getPassword(), fileName);
+		String subject = "Forgot Password";
+		String fileName = "RECOVER-PWD-BODY.txt";
+		String body = readEmailBody(entity.getEmail(), entity.getPassword(), fileName);
 		boolean sendEmail = emailUtils.sendEmail(email, subject, body);
-		if(sendEmail) {
+		if (sendEmail) {
 			return "Password send to your Registered Email";
 		}
 		return null;
@@ -171,43 +180,43 @@ public class UserMgmtServiceImpl implements UserMgmtService {
 		// String alphaNumeric=upperAlphabet+lowerAlphabet+numbers;
 		String alphaNumeric = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 		StringBuilder sb = new StringBuilder();
-		Random random = new Random();
 		int length = 6;
 		for (int i = 0; i < length; i++) {
-			int index = random.nextInt(alphaNumeric.length());
+			int index = this.random.nextInt(alphaNumeric.length());
 			char randomChar = alphaNumeric.charAt(index);
 			sb.append(randomChar);
 		}
 		return sb.toString();
 
 	}
-	private String readEmailBody(String fullname,String pwd,String filename) {
-		
-		String url="";
-		String mailBody=null;
-		try {
-			FileReader fr=new FileReader(filename);//read character one by one
-			BufferedReader br=new BufferedReader(fr);//read line by line
-			
-			StringBuffer buffer=new StringBuffer();
-			String line = br.readLine();//ready line 
-			while(line!=null) {
-				buffer.append(line);
-				line=br.readLine();
+
+	private String readEmailBody(String fullname, String pwd, String filename) {
+
+		String url = "";
+		String mailBody = null;
+//		 try with resources it was introduced in java 1.7 version ,once try with resources
+//		is used resources will be auto closed
+//		or we can use finally block to close the resources try-catch-finally-br.closed() inside finally
+		try (FileReader fr = new FileReader(filename); // read character one by one
+				BufferedReader br = new BufferedReader(fr);// read line by line
+		) {
+
+			StringBuilder builder = new StringBuilder();
+			String line = br.readLine();// ready line
+			while (line != null) {
+				builder.append(line);
+				line = br.readLine();
 			}
-			br.close();
-			mailBody =buffer.toString();
-			mailBody=mailBody.replace("{FULLNAME}", fullname);
-			mailBody=mailBody.replace("{TEMP-PWD}", pwd);
-			mailBody=mailBody.replace("{URL}",url);
-			mailBody=mailBody.replace("{PWD}",pwd);
-			
-		}catch(Exception e) {
-			e.printStackTrace();
+			mailBody = builder.toString();
+			mailBody = mailBody.replace("{FULLNAME}", fullname);
+			mailBody = mailBody.replace("{TEMP-PWD}", pwd);
+			mailBody = mailBody.replace("{URL}", url);
+			mailBody = mailBody.replace("{PWD}", pwd);
+
+		} catch (Exception e) {
+			logger.error("Exception Occured",e);
 		}
 		return mailBody;
 	}
-
-	
 
 }
